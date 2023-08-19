@@ -64,28 +64,22 @@ class CustomRetriever(BaseRetriever):
         retrieve_nodes = [combined_dict[rid] for rid in retrieve_ids]
         return retrieve_nodes
 
-def generate_output(input_text, lang):
-    return "cc"
+def generate_output(input_text):
     place_dict = find_place_from_name(input_text)
     url = place_dict['places'][0]['websiteUri']
     name = place_dict['places'][0]['displayName']['text']
     address = place_dict['places'][0]['formattedAddress']
 
-    if lang == "English":
-        default_prompt = "What are the indications for people with disability coming to this place? If none don't make it up."
-    elif lang == "French":
-        default_prompt = "Quelles sont les indications pour les personnes handicapées venant dans ce lieu ? Si aucun, ne l'inventez pas."
-    else:
-        default_prompt = "What are the indications for people with disability coming to this place? If none don't make it up."
+    default_prompt = "What are the indications for people with disability coming to this place? If none is provided don't make it up."
     information = generate_answer(url, default_prompt)
-    answer = f"""{name}\n {address} \n\n{information}"""
+    answer = f"""{name} ({url})\n{address} \n\n{information}"""
     return answer
 
 
 
 def generate_answer(url, prompt):
     openai.api_key = os.environ['OPEN_AI_API_KEY']
-    keywords = ['handicap', 'pmr', 'acces', 'mobility', 'disable', 'disability', 'pratique', 'practical', 'venu',
+    keywords = ['handicap', 'tarifs', 'price', 'pmr', 'acces', 'mobility', 'disable', 'disability', 'pratique', 'practical', 'venu',
                 'venir']
     urls = get_all_urls(url, keywords)
     # define custom retriever
