@@ -10,7 +10,7 @@ def find_place_from_name(name: str):
     }
 
     data = {
-        "textQuery": name
+        "textQuery": name,
     }
 
     response = requests.post(url, json=data, headers=headers)

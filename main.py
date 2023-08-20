@@ -4,9 +4,9 @@ import time
 
 def make_gradio():
     examples = [
-        ['Tower of London'],
+        ['Tower of London'], ['Orsay Museum'],
         ['Le Louvre'],
-        ['MoMA'],
+        ["""Taj Mahal in India"""],
         ['Eiffel Tower'],
         ['Sagrada Familia'],
     ]
@@ -26,7 +26,6 @@ def make_gradio():
 
             def get_info(inputs, progress=gr.Progress()):
                 progress(0.5, desc="Processing...")
-                time.sleep(4)
                 return {
                     outputs : generate_output(inputs),
                     btn : gr.update(value="Search again!")

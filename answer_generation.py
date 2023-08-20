@@ -66,11 +66,14 @@ class CustomRetriever(BaseRetriever):
 
 def generate_output(input_text):
     place_dict = find_place_from_name(input_text)
-    url = place_dict['places'][0]['websiteUri']
     name = place_dict['places'][0]['displayName']['text']
+    try:
+        url = place_dict['places'][0]['websiteUri']
+    except:
+        return f"""No website found for this place : {name}"""
     address = place_dict['places'][0]['formattedAddress']
 
-    default_prompt = "What are the indications for people with disability coming to this place? If none is provided don't make it up."
+    default_prompt = "What are the indications for people with disability coming to this place? If none is provided don't make it up. Answer in English."
     information = generate_answer(url, default_prompt)
     answer = f"""{name} ({url})\n{address} \n\n{information}"""
     return answer
@@ -79,12 +82,14 @@ def generate_output(input_text):
 
 def generate_answer(url, prompt):
     openai.api_key = os.environ['OPEN_AI_API_KEY']
-    keywords = ['handicap', 'tarifs', 'price', 'pmr', 'acces', 'mobility', 'disable', 'disability', 'pratique', 'practical', 'venu',
-                'venir']
+    keywords = ['handicap', 'faq', 'tarifs', 'acceder', 'price', 'pmr', 'access', 'mobility', 'disable', 'disability', 'pratique', 'practical']
     urls = get_all_urls(url, keywords)
     # define custom retriever
     if url not in urls:
         urls.append(url)
+
+
+    print(urls)
     documents = SimpleWebPageReader(html_to_text=True).load_data(
         urls
     )

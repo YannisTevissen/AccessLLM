@@ -9,6 +9,7 @@ from loguru import logger as log
 import httpx
 from parsel import Selector
 from urllib.parse import urljoin
+from usp.tree import sitemap_tree_for_homepage
 
 class UrlFilter:
     IGNORED_EXTENSIONS = [
@@ -91,7 +92,7 @@ class UrlFilter:
 def extract_urls(response: httpx.Response) -> List[str]:
     tree = Selector(text=response.text)
     # using XPath
-    urls = tree.xpath('//a/@href').getall()
+    #urls = tree.xpath('//a/@href').getall()
     # or CSS
     urls = tree.css('a::attr(href)').getall()
     # we should turn all relative urls to absolute, e.g. /foo.html to https://domain.com/foo.html
@@ -101,14 +102,36 @@ def extract_urls(response: httpx.Response) -> List[str]:
 def match_keywords(url, keywords):
     for k in keywords:
         if k in url:
+            print(url, k)
             return True
     return False
+# def get_all_urls(base_url: str, keywords):
+#     print(base_url)
+#     domain = urlparse(base_url).netloc
+#     print(domain)
+#     nytimes_filter = UrlFilter(domain=domain)
+#     response = httpx.get(base_url)
+#     urls = extract_urls(response)
+#     #filtered = nytimes_filter.filter(urls)
+#     kw_filter = [url for url in urls if match_keywords(url, keywords)]
+#     #print(kw_filter)
+#     return kw_filter
+
 def get_all_urls(base_url: str, keywords):
+    print(base_url)
     domain = urlparse(base_url).netloc
     print(domain)
-    nytimes_filter = UrlFilter(domain=domain)
-    response = httpx.get(base_url)
-    urls = extract_urls(response)
-    filtered = nytimes_filter.filter(urls)
-    print(filtered)
-    return [url for url in filtered if match_keywords(url, keywords)]
+    tree = sitemap_tree_for_homepage(base_url)
+    urls = []
+    for page in tree.all_pages():
+        urls.append(page.url)
+        #print(page)
+    kw_filter = [url for url in urls if match_keywords(url, keywords)]
+    if len(kw_filter) > 10:
+        kw_filter = [url for url in kw_filter if match_keywords(url, ['disabled', 'accessib'])]
+    #print(kw_filter)
+
+    # failsafe to prevent too long requests
+    if len(kw_filter) > 20:
+        kw_filter = kw_filter[:20]
+    return kw_filter
