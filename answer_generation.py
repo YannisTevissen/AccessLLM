@@ -73,7 +73,7 @@ def generate_output(input_text):
         return f"""No website found for this place : {name}"""
     address = place_dict['places'][0]['formattedAddress']
 
-    default_prompt = "What are the indications for people with disability coming to this place? If none is provided don't make it up. Answer in English."
+    default_prompt = "What are the indications for people with a disability or physical impairment coming to this place? If none is provided don't make it up. Answer in English."
     information = generate_answer(url, default_prompt)
     answer = f"""{name} ({url})\n{address} \n\n{information}"""
     return answer
